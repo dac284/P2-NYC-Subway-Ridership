@@ -9,7 +9,14 @@ output: html_document
 
 ### Section 0: References
 histogram bin sizes: http://stackoverflow.com/questions/6986986/bin-size-in-matplotlib-histogram
+http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.legend
 OLS: http://statsmodels.sourceforge.net/devel/generated/statsmodels.regression.linear_model.OLS.html
+heatmap:
+http://matplotlib.org/users/text_intro.html
+http://stackoverflow.com/questions/14391959/heatmap-in-matplotlib-with-pcolor
+http://stackoverflow.com/questions/15908371/matplotlib-colorbars-and-its-text-labels
+http://stackoverflow.com/questions/19084476/how-to-make-matrices-in-python
+http://matplotlib.org/examples/pylab_examples/colorbar_tick_labelling_demo.html
 ### Section 1: Statistical Test
 1.1 Which statistical test did you use to analyze the NYC subway data? Did you use a one-tail or a two-tail P value? What is the null hypothesis? What is your p-critical value?
 We used a Mann-Whitney U-test to analyze the difference between ridership on rainy vs. non-rainy days. It is a two-tailed test with the null hypothesis that the two samples come from populations with the same distribution. The p-critical value is 0.05.
@@ -21,17 +28,21 @@ The mann-whitney test gave a p-value 0.025. The mean of ridership with rain was 
 At the 95% confidence level, we can reject the null hyopthesis and conclude that the distributions for ridership are different with and without rain. There is only a 2.5% chance of getting a U-statistic that large for samples from identical population distributions.
 ### Section 2: Linear Regression
 2.1 What approach did you use to compute the coefficients theta and produce prediction for ENTRIESn_hourly in your regression model:
-OLS using Statsmodels or Scikit Learn
-
+I used OLS regression using Statsmodels to create a linear regression model
 2.2 What features (input variables) did you use in your model? Did you use any dummy variables as part of your features?
+The features I chose were: mintempi, Hour, fog, meanwindspdi, and the UNIT as a dummy variable
 2.3 Why did you select these features in your model? We are looking for specific reasons that lead you to believe that
 the selected features will contribute to the predictive power of your model.
-Your reasons might be based on intuition. For example, response for fog might be: “I decided to use fog because I thought that when it is very foggy outside people might decide to use the subway more often.”
-Your reasons might also be based on data exploration and experimentation, for example: “I used feature X because as soon as I included it in my model, it drastically improved my R2 value.”  
+I chose mintempi because some measure of temp seemed important as a baseline weather measurement, and min temp slighlty increased the R2 value compared to mean or max temp. Hour was an important feature because ridership varies greatly by time of day. Fog and meanwindspdi were chosen because they represent weather factors that will influence someone's desire to ride the subway, and did a better job than rain (depsite the significance found in part 1) at improving R2. The UNIT dummy variable greatly imporved R2, so it was also included.
 2.4 What are the parameters (also known as "coefficients" or "weights") of the non-dummy features in your linear regression model?
+mintempi         -12.188968
+Hour              65.391205
+fog              192.237429
+meanwindspdi      27.099674
 2.5 What is your model’s R2 (coefficients of determination) value?
+The model had an R2 of 0.481
 2.6 What does this R2 value mean for the goodness of fit for your regression model? Do you think this linear model to predict ridership is appropriate for this dataset, given this R2  value?
-### Section 3: Visualization
+The R2 value is still not very high. A linear model may not be appropriate for this data, or we may be missing some feature that has a high correlation with ridership. 
 
 ### Section 4: Conclusion
 
