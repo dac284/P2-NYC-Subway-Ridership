@@ -210,10 +210,286 @@ meanwindspdi      27.099674<br>
 2.5 What is your model’s R2 (coefficients of determination) value?<br>
 The model had an R2 of 0.481.<br>
 2.6 What does this R2 value mean for the goodness of fit for your regression model? Do you think this linear model to predict ridership is appropriate for this dataset, given this R2  value?<br>
-The R2 value indicates the percent of variability in ridership explained by the model - in this case only 48%, or about half. The fact that the residual variability is more than 50% tells me that this is not a great linear model for predicting ridership. In addition, the histogram of residuals (not shown here) is clearly skewed right, and not normally distributed, as assumed by the model. The presence of large, non-normal residuals and low R squared value signifies that a linear model is not appropriate for this data.</p>
+The R2 value indicates the percent of variability in ridership explained by the model - in this case only 48%, or about half. The fact that the residual variability is more than 50% tells me that this is not a great linear model for predicting ridership. In addition, the histogram of residuals (shown below) is clearly skewed right, and not normally distributed, as assumed by the model. The presence of large, non-normal residuals and low R squared value signifies that a linear model is not appropriate for this data.</p>
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="kn">as</span> <span class="nn">sm</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="k">def</span> <span class="nf">linear_regression</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">OLS</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+    <span class="n">intercept</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">params</span>
+
+<span class="k">def</span> <span class="nf">predictions</span><span class="p">(</span><span class="n">dataframe</span><span class="p">):</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[[</span><span class="s">&#39;mintempi&#39;</span><span class="p">,</span> <span class="s">&#39;Hour&#39;</span><span class="p">,</span> <span class="s">&#39;fog&#39;</span><span class="p">,</span> <span class="s">&#39;meanwindspdi&#39;</span><span class="p">]]</span>
+    <span class="c">#dummy_units = pd.get_dummies(pd.Categorical.from_array(dataframe[&#39;Hour&#39;]), prefix=&#39;Hour&#39;)</span>
+    <span class="c">#features = features.join(dummy_units)</span>
+    <span class="n">dummy_units</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">dataframe</span><span class="p">[</span><span class="s">&#39;UNIT&#39;</span><span class="p">],</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;Unit&#39;</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dummy_units</span><span class="p">)</span>
+    <span class="c"># Values</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">dataframe</span><span class="p">[</span><span class="s">&#39;ENTRIESn_hourly&#39;</span><span class="p">]</span>
+    <span class="c"># linear regression</span>
+    <span class="n">intercept</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="n">linear_regression</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">intercept</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">predictions</span>
+
+<span class="k">def</span> <span class="nf">plot_residuals</span><span class="p">(</span><span class="n">turnstile_weather</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="p">(</span><span class="n">turnstile_weather</span><span class="p">[</span><span class="s">&#39;ENTRIESn_hourly&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;Histogram of Linear Regression Residuals&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span> <span class="s">&#39;bold&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&quot;Residual from Linear Model&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&quot;Frequency&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plt</span>
+
+<span class="n">turnstile_weather</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">&#39;~/Desktop/P2_NYCRidershipData/turnstile_data_master_with_weather.csv&#39;</span><span class="p">)</span>
+<span class="n">plot_residuals</span><span class="p">(</span><span class="n">turnstile_weather</span><span class="p">,</span> <span class="n">predictions</span><span class="p">(</span><span class="n">turnstile_weather</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[7]:</div>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;module &apos;matplotlib.pyplot&apos; from &apos;//anaconda/lib/python2.7/site-packages/matplotlib/pyplot.pyc&apos;&gt;</pre>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+RU5ErkJggg==
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -227,14 +503,12 @@ The R2 value indicates the percent of variability in ridership explained by the 
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="c"># from collections import Counter</span>
-
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
 <span class="k">def</span> <span class="nf">entries_histogram</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
@@ -291,7 +565,7 @@ The R2 value indicates the percent of variability in ridership explained by the 
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[1]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -745,7 +1019,7 @@ AABJRU5ErkJggg==
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Section-4:-Conclusion">Section 4: Conclusion<a class="anchor-link" href="#Section-4:-Conclusion">&#182;</a></h3><p>The mean of ridership with rain was 1105.45, and the mean without rain was 1090.28. This suggests slightly more people tend to ride the subway when it is raining. Though we could not compare the two means with a t-test, because the distributions are not normal, we did see through the mann-whitney u-test that there is only a small probability (&lt;2.5%) that ridership with and without rain come from the same population distribution. We can therefore say there is a significant difference in ridership with and without rain, with more people riding during rainy days.</p>
+<h3 id="Section-4:-Conclusion">Section 4: Conclusion<a class="anchor-link" href="#Section-4:-Conclusion">&#182;</a></h3><p>The mean of ridership with rain was 1105.45, and the mean without rain was 1090.28. This suggests slightly more people tend to ride the subway when it is raining. Though we could not compare the two means with a t-test, because the distributions are not normal, we did see through the mann-whitney u-test that there is only a small probability (&lt;5%) that ridership with and without rain come from the same population distribution. We can therefore say there is a significant difference in ridership with and without rain, with more people riding during rainy days.</p>
 <p>Though I did not end up using rain as a feature in the linear model generated above, I did go through iterations where rain was a covariate. I ended up not including rain because I was able to achieve better r squared results with other variables, and I could only use a limited number of variables do to limitations on processing time. If rain had been included in the model, we would have seen a positive coefficient, indicating an increase in estimated/predicted ridership with rain. This agrees with the statistical test discussed above.</p>
 
 </div>
